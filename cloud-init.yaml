@@ -30,13 +30,14 @@ runcmd:
   - rm -rf /etc/apache2/sites-enabled/000-default.conf /etc/apache2/sites-available/000-default.conf /var/www/html
   # Clone docs-cd
   - git clone https://github.com/catalyst/docs-cd.git /home/ubuntu/docs-cd
+  - chown ubuntu.ubuntu /home/ubuntu/docs-cd
   # Create a cron job that checks for updates compiles documentation every hour.
-  - echo "0 * * * * /home/ubuntu/docs-cd/docs-cd.py -c /home/ubuntu/docs-cd/config.yaml" > /var/spool/cron/crontabs/ubuntu
+  - echo "0 * * * * /home/ubuntu/docs-cd/docs-cd.py -c /home/ubuntu/docs-cd/config.yaml -l /home/ubuntu/docs-cd/docs-cd.log" > /var/spool/cron/crontabs/ubuntu
   - chmod 600 /var/spool/cron/crontabs/ubuntu
   - chown ubuntu.crontab /var/spool/cron/crontabs/ubuntu
   # Create a cron job that updates apache's configuration every minute, if there
   # is a need to change it.
-  - echo "* * * * * /home/ubuntu/docs-cd/docs-publish.sh -c /home/ubuntu/docs-cd/config.yaml -t /home/ubuntu/docs-cd/vhost.cfg" > /var/spool/cron/crontabs/root
+  - echo "* * * * * /home/ubuntu/docs-cd/docs-publish.py -c /home/ubuntu/docs-cd/config.yaml -t /home/ubuntu/docs-cd/vhost.cfg -l /home/ubuntu/docs-cd/docs-publish.log" > /var/spool/cron/crontabs/root
   - chmod 600 /var/spool/cron/crontabs/root
   - chown root.crontab /var/spool/cron/crontabs/root
 

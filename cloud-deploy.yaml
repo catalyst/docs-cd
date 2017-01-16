@@ -68,7 +68,7 @@
         state: present
         name: "{{ instance_name }}"
         image: "{{ image }}"
-        key_name: "bruno"
+        key_name: "{{ keypair_name }}"
         flavor: "{{ flavor }}"
         userdata: "{{ lookup('file', user_data) }}"
         nics:
@@ -89,4 +89,3 @@
     #- add_host: name=floating_ip_info.floating_ip.floating_ip_address
     #            ansible_user=ubuntu
     #            instance_name={{ instance_name }}
-

@@ -58,7 +58,7 @@ if __name__ == "__main__":
     # If output to a log file has been requested (-l), overwrite stdout with the
     # file.
     if args.log_file:
-        sys.stdout = open(args.output_file, 'a')
+        sys.stdout = open(args.log_file, 'a')
 
     # Parse the config file.
     with open(args.config, 'r') as f:

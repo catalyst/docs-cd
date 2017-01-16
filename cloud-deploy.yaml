@@ -17,7 +17,7 @@
     # Attributes used for launching the compute instance (required)
     image: ubuntu-16.04-x86_64
     private_network_name: private-net
-    #keypair_name: docs-cd
+    keypair_name: docs-cd
     instance_name: docs-cd
     flavor: c1.c1r1
     security_group_name: docs-cd

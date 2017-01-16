@@ -48,8 +48,12 @@ docs-publish.sh
 ---------------
 
 docs-publish.sh is a simple script that publishes the latest successful build of
-the documentation to its corresponding apache vHost. It does that by updating a
-symlink that points to the latest version of the docs.
+the documentation to its corresponding apache vHost. It does this by creating an
+apache vHost config file and updating a symlink that points to the latest
+version of the docs.
+
+Since this script touches /etc/apache2 and reload the apache config, it must be
+run as root.
 
 docs-run.sh
 -----------

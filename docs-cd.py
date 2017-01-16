@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 #
 # Copyright (c) 2016 Catalyst.net Ltd
 # This program is free software: you can redistribute it and/or modify
@@ -148,6 +148,7 @@ if __name__ == "__main__":
             # changes to the environment variables made by virtualenv's activate
             # script.
             try:
+                log("Compiling the documentation")
                 subprocess.check_output(["bash", "-c", "source " + venv_path + "/bin/activate && pip install -r " + docs_path + "/requirements.txt && make html"])
             except Exception as error:
                 log("Error compiling documentation for " + project)

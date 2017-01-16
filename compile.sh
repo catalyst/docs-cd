@@ -15,6 +15,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+# This is just a sample script illustrating how Sphinx docs are generally
+# compiled.
+
 if [ $# -eq 0 ]; then
   echo "No arguments supplied. Please specify the project path."
   exit 1

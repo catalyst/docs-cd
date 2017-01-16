@@ -6,6 +6,8 @@ docs-cd:
   # The home parameter defines where docs-cd will store all documentation
   # artifacts it produces.
   home: /home/ubuntu/docs-cd
+  # Apache www home, so that built documents can be stored in there.
+  www-home: /var/www
   # The versions parameter defines how many versions of the documentation
   # docs-cd will preserve under PROJECT_PATH/html/commit_id. Note that a new
   # version is generated with every new commit (change) followed by the

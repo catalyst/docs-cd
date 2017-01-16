@@ -1,0 +1,40 @@
+#cloud-config
+
+# Set the hostname and FQDN
+fqdn: docs-cd
+manage_etc_hosts: true
+
+# Set the timezone to UTC (strongly recommended)
+timezone: UTC
+
+# Set the locale
+locale: en_US.UTF-8
+
+# Run package update and upgrade on first boot
+package_upgrade: true
+
+# Install packages
+packages:
+  - git
+  - apache2
+  - python-virtualenv
+  - python-pip
+  - python-dev
+  - unattended-upgrades
+
+# Run commands (in order, output displayed on the console)
+runcmd:
+  # Enable unattended upgrades
+  - echo unattended-upgrades unattended-upgrades/enable_auto_updates boolean true | debconf-set-selections
+  # Disable apache's default site
+  - rm -rf /etc/apache2/sites-enabled/000-default.conf /etc/apache2/sites-available/000-default.conf /var/www/html
+  # Clone docs-cd
+  - git clone https://github.com/catalyst/docs-cd.git /home/ubuntu/docs-cd
+
+# Reboot when finished
+power_state:
+  mode: reboot
+  message: Rebooting to apply new settings
+
+# Log all cloud-init process output (info & errors) to a logfile
+output: {all: ">> /var/log/cloud-init-output.log"}

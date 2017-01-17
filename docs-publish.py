@@ -76,29 +76,31 @@ if __name__ == "__main__":
         venv_path = project_path + "/venv"
         html_path = project_path + "/html"
         www_path = docs_config["www-home"] + "/" + domain
+        vhost_path = "/etc/apache2/sites-available/" + domain + ".conf"
+        vhost_symlink = "/etc/apache2/sites-enabled/" + domain + ".conf"
         log("Working on project ", project, ".")
 
         # Create an apache vhost config for this project, if one does not exist
         # yet.
-        if not os.path.isfile("/etc/apache2/sites-available/" + domain):
+        if not os.path.isfile(vhost_path):
             log("Creating a vhost config for the project")
             # Read vhost template from file
             with open(args.vhost_template, 'r') as f:
               vhost_template = f.read()
               vhost = vhost_template.replace('${SERVER_NAME}', domain)
             # Write new vhost to file
-            with open("/etc/apache2/sites-available/" + domain, 'w') as f:
+            with open(vhost_path, 'w') as f:
                 f.write(vhost)
             changes = True
 
         # Enable the apache vhost, if not enabled yet.
-        if not os.path.islink("/etc/apache2/sites-enabled/" + domain):
+        if not os.path.islink(vhost_symlink):
             log("Enabling the vhost for the project")
             try:
-                os.symlink("/etc/apache2/sites-available/" + domain, "/etc/apache2/sites-enabled/" + domain)
+                os.symlink(vhost_path + ".conf", vhost_symlink)
                 changes = True
             except Exception as error:
-                log("Error creating symlink from " + "/etc/apache2/sites-available/" + domain + " to " + "/etc/apache2/sites-enabled/" + domain)
+                log("Error creating symlink from " + vhost_path + " to " + vhost_symlink)
                 abort(error)
         # Find out the latest successful build of the docs for this project.
         # TODO: make this a function that is re-used on docs-cd.py.

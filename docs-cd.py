@@ -157,7 +157,7 @@ if __name__ == "__main__":
             if not os.path.isdir(html_path):
                 os.mkdir(html_path)
             # Move the latest build to project_path/html/commit_id.
-            shutil.move(docs_path + "/build", html_path + "/" + head)
+            shutil.move(docs_path + "/build/html", html_path + "/" + head)
         else:
             log("Documentation for " + project + " is already up to date")
 

@@ -17,5 +17,5 @@ docs-cd:
 
 projects:
   Catalyst Cloud:
-    domain: catalystcloud.io
+    domain: docs.catalystcloud.io
     git: https://github.com/catalyst/catalystcloud-docs

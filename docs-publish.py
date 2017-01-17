@@ -97,7 +97,7 @@ if __name__ == "__main__":
         if not os.path.islink(vhost_symlink):
             log("Enabling the vhost for the project")
             try:
-                os.symlink(vhost_path + ".conf", vhost_symlink)
+                os.symlink(vhost_path, vhost_symlink)
                 changes = True
             except Exception as error:
                 log("Error creating symlink from " + vhost_path + " to " + vhost_symlink)

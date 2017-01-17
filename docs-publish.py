@@ -84,11 +84,20 @@ if __name__ == "__main__":
         # yet.
         if not os.path.isfile(vhost_path):
             log("Creating a vhost config for the project")
-            # Read vhost template from file
+            # Read vhost template from file.
             with open(args.vhost_template, 'r') as f:
               vhost_template = f.read()
               vhost = vhost_template.replace('${SERVER_NAME}', domain)
-            # Write new vhost to file
+              # If IP access restriction has been defined on the config file,
+              # add the "Require ip" rule to the vhost.
+              try:
+                  projects[project]["restrict-ip"]
+              except KeyError:
+                  pass
+              else:
+                  vhost = vhost.replace('# Require ip', "Require ip " + projects[project]["restrict-ip"])
+
+            # Write new vhost to file.
             with open(vhost_path, 'w') as f:
                 f.write(vhost)
             changes = True

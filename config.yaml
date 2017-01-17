@@ -16,6 +16,12 @@ docs-cd:
   versions: 30
 
 projects:
+  # Sample documentation project exposed to the public Internet.
   Catalyst Cloud:
     domain: docs.catalystcloud.io
     git: https://github.com/catalyst/catalystcloud-docs
+  # Sample documentation project with IP access restrictions.
+  Catalyst Cloud Private:
+    domain: private-docs.catalystcloud.io
+    git: https://github.com/catalyst/catalystcloud-docs
+    restrict-ip: 202.78.240.7/32

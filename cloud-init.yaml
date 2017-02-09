@@ -26,6 +26,7 @@ packages:
 runcmd:
   # Enable unattended upgrades
   - echo unattended-upgrades unattended-upgrades/enable_auto_updates boolean true | debconf-set-selections
+  - dpkg-reconfigure -fnoninteractive unattended-upgrades
   # Disable apache's default site
   - rm -rf /etc/apache2/sites-enabled/000-default.conf /etc/apache2/sites-available/000-default.conf /var/www/html
   # Clone docs-cd

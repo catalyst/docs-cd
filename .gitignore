@@ -1,0 +1,4 @@
+.idea/
+ansible-venv/
+catalyst-cloud-deploy.yaml
+catalyst-cloud-init.yaml

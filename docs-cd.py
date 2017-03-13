@@ -99,7 +99,7 @@ if __name__ == "__main__":
         # pull updates.
         if not os.path.isdir(docs_path):
             try:
-                log("Clonning git repository " + repository)
+                log("Cloning git repository " + repository)
                 subprocess.check_output(["git", "clone", repository,  docs_path])
                 os.chdir(docs_path)
             except Exception as error:

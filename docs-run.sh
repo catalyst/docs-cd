@@ -23,4 +23,4 @@
 /home/ubuntu/docs-cd/docs-cd.py -c /home/ubuntu/docs-cd/config.yaml
 
 # Publish all projects
-sudo /home/ubuntu/docs-cd/docs-publish.py  -c /home/ubuntu/docs-cd/config.yaml -t  -c /home/ubuntu/docs-cd/vhost_template.cfg
+sudo /home/ubuntu/docs-cd/docs-publish.py  -c /home/ubuntu/docs-cd/config.yaml -t /home/ubuntu/docs-cd/vhost_template.cfg -c /home/ubuntu/docs-cd/vhost_template.cfg

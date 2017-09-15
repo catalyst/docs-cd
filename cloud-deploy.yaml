@@ -17,7 +17,7 @@
     # Attributes used for launching the compute instance (required)
     image: ubuntu-16.04-x86_64
     private_network_name: private-net
-    keypair_name: docs-cd
+    keypair_name: keypair
     instance_name: docs-cd
     flavor: c1.c1r1
     security_group_name: docs-cd
@@ -43,7 +43,17 @@
       os_security_group:
         state: present
         name: "{{ security_group_name }}"
-        description: HTTP and HTTPS access to docs-cd
+        description: SSH, HTTP and HTTPS access to docs-cd
+
+    - name: Create a security group rule for SSH access
+      os_security_group_rule:
+        state: present
+        security_group: "{{ security_group_name }}"
+        protocol: tcp
+        port_range_min: 22
+        port_range_max: 22
+        remote_ip_prefix: 0.0.0.0/0
+
 
     - name: Create a security group rule for HTTP access
       os_security_group_rule:
@@ -74,18 +84,26 @@
         nics:
           - net-name: "{{ private_network_name }}"
         security_groups: "default,{{ security_group_name }}"
-
-    #- name: Assign a floating IP
-    #  os_floating_ip:
-    #    server: "{{ instance_name }}"
-    #  register: floating_ip_info
-
-    #- name: Output floating IP
-    #  debug:
-    #    var: floating_ip_info.floating_ip.floating_ip_address
+        auto_ip: true
+      register: instance
 
     # Add the compute instance as a new host to Ansible's in memory inventory,
     # so that it can be utilised by another play on the same playbook.
-    #- add_host: name=floating_ip_info.floating_ip.floating_ip_address
-    #            ansible_user=ubuntu
-    #            instance_name={{ instance_name }}
+    - add_host: name={{ instance.server.public_v4 }}
+                groups=created_nodes
+                ansible_user=ubuntu
+                instance_name={{ instance.server.name }}
+
+# Copy the config.yaml file to the compute instance
+- name: Configure the compute instance
+  hosts: created_nodes
+  become: yes
+  become_method: sudo
+  become_user: root
+  tasks:
+    - name: Wait for SSH to come up
+      wait_for_connection:
+    - name: Copy config.yaml to /home/ubuntu/docs-cd/config.yaml
+      copy:
+        src: config.yaml
+        dest: /home/ubuntu/docs-cd/config.yaml

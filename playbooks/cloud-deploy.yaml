@@ -92,5 +92,5 @@
       wait_for_connection:
     - name: Copy config.yaml to /home/ubuntu/docs-cd/config.yaml
       copy:
-        src: config.yaml
+        src: ../config.yaml
         dest: /home/ubuntu/docs-cd/config.yaml

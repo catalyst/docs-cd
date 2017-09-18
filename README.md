@@ -52,6 +52,11 @@ the documentation to its corresponding apache vHost. It does this by creating an
 apache vHost config file and updating a symlink that points to the latest
 version of the docs.
 
+If a vHost does not exist for a given project, it will be created using
+templates/vhost_template.cfg as a template. The "# Require ip" line on the
+template is replaced with IP restrictions, if defined on the project
+configuration.
+
 Since this script touches /etc/apache2 and reload the apache config, it must be
 run as root.
 
@@ -65,7 +70,40 @@ This is the script that you are expected to run as frequently as desirable using
 cron or similar. It can also be run manually to update all project docs
 immediately.
 
-docs-cleanup.sh
----------------
-docs-cleanup.sh cleans up obsolete apache config related to projects that no
-longer exist in the docs container in object storage.
+templates/compile.sh
+--------------------
+
+This is a script illustrating how docs-cd compiles your documentation on the
+server side.
+
+In order for it to work, you need to make sure that:
+
+* You have a `requirements.txt` file on the root of the documentation project
+  with all python packages required to compile your documentation successfully,
+  including Sphinx.
+
+* Running `make html` works and outputs the built documentation to "build/".
+
+How to deploy
+=============
+
+A sample Ansible playbook to deploy docs-cd on OpenStack is provided under the
+`playbook` directory.
+
+Before running the playbook you must adjust the following configuration files:
+
+* playbook/cloud-config.yaml: Defines the variables used by the playbook, such
+  as the compute instance name and flavour.
+
+* playbook/cloud-init.yaml: Uses cloud-init to install docs-cd on the target
+  compute instance. Please note it assumes Ubuntu 16.04 is the guest operating
+  system.
+
+* templates/config.yaml: This file is copied to the target instance and used as
+  the configuration file for docs-cd.
+
+Run the playbook: `ansible-playbook cloud-config.yaml`
+
+Once docs-cd is deployed, it uses an hourly cronjob to trigger the documentation
+builds. If you are in a rush, you can force a build to happen by running
+`cd /home/ubuntu/docs-cd && ./docs-run.sh`.

@@ -38,7 +38,7 @@ runcmd:
   - chown ubuntu.crontab /var/spool/cron/crontabs/ubuntu
   # Create a cron job that updates apache's configuration every minute, if there
   # is a need to change it.
-  - echo "* * * * * /home/ubuntu/docs-cd/docs-publish.py -c /home/ubuntu/docs-cd/config.yaml -t /home/ubuntu/docs-cd/vhost_template.cfg -l /home/ubuntu/docs-cd/docs-publish.log" > /var/spool/cron/crontabs/root
+  - echo "* * * * * /home/ubuntu/docs-cd/docs-publish.py -c /home/ubuntu/docs-cd/config.yaml -t /home/ubuntu/docs-cd/templates/vhost_template.cfg -l /home/ubuntu/docs-cd/docs-publish.log" > /var/spool/cron/crontabs/root
   - chmod 600 /var/spool/cron/crontabs/root
   - chown root.crontab /var/spool/cron/crontabs/root
 

@@ -24,4 +24,4 @@ projects:
   Catalyst Cloud Private:
     domain: private-docs.catalystcloud.io
     git: https://github.com/catalyst/catalystcloud-docs
-    restrict-ip: 202.78.240.7/32
+    restrict-ip: 100.100.100.100/32

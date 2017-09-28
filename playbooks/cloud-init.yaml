@@ -15,11 +15,12 @@ package_upgrade: true
 
 # Install packages
 packages:
-  - git
   - apache2
-  - python-virtualenv
-  - python-pip
+  - git
+  - python3
   - python-dev
+  - python-pip
+  - python-virtualenv
   - unattended-upgrades
 
 # Run commands (in order, output displayed on the console)

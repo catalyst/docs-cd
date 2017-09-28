@@ -10,7 +10,7 @@
   tasks:
     - name: Load variables from cloud-config.yaml
       include_vars: "cloud-config.yaml"
-      
+
     #- name: Fetch information about the Catalyst Cloud
     #  os_client_config:
     #    clouds:
@@ -32,7 +32,7 @@
         name: "{{ security_group_name }}"
         description: SSH, HTTP and HTTPS access to docs-cd
 
-    - name: Create a security group rule for SSH access
+    - name: Create a security rule for SSH access
       os_security_group_rule:
         state: present
         security_group: "{{ security_group_name }}"
@@ -42,7 +42,7 @@
         remote_ip_prefix: "{{ expose_ssh_to }}"
 
 
-    - name: Create a security group rule for HTTP access
+    - name: Create a security rule for HTTP access
       os_security_group_rule:
         state: present
         security_group: "{{ security_group_name }}"
@@ -51,7 +51,7 @@
         port_range_max: 80
         remote_ip_prefix: 0.0.0.0/0
 
-    - name: Create a security group rule for HTTPS access
+    - name: Create a security rule for HTTPS access
       os_security_group_rule:
         state: present
         security_group: "{{ security_group_name }}"

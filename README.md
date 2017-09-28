@@ -102,7 +102,8 @@ Before running the playbook you must adjust the following configuration files:
 * templates/config.yaml: This file is copied to the target instance and used as
   the configuration file for docs-cd.
 
-Run the playbook: `ansible-playbook cloud-config.yaml`
+To deploy, source your OpenStack variables (`source openrc.sh`) and run the
+playbook: `ansible-playbook cloud-config.yaml -i inventory`.
 
 Once docs-cd is deployed, it uses an hourly cronjob to trigger the documentation
 builds. If you are in a rush, you can force a build to happen by running

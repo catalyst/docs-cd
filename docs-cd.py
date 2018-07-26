@@ -22,24 +22,33 @@ import yaml
 import time
 import subprocess
 import shutil
+import shlex
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Functions
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+
 
 def get_args():
-    parser = argparse.ArgumentParser(description='Continuous deployment documentation system based on Sphinx')
+    parser = argparse.ArgumentParser(
+        description='Continuous deployment documentation system based on Sphinx')
     parser.add_argument('-c', '--config', type=str, help='Configuration file', required=True)
-    parser.add_argument('-l', '--log', type=str, help='Write output to a log file', action='store', dest='log_file')
-    parser.add_argument('-f', '--force', help='Force creation of fresh virtual environments for all projects (may help pip solving dependency issues)', action='store_true', dest='venv_refresh')
+    parser.add_argument('-l', '--log', type=str, help='Write output to a log file',
+                        action='store', dest='log_file')
+    parser.add_argument('-f', '--force',
+                        help='Force creation of fresh virtual environments for all projects \
+                                (may help pip solving dependency issues)',
+                        action='store_true', dest='venv_refresh')
     args = parser.parse_args()
     return args
+
 
 def log(*args):
     print(time.strftime("%Y/%m/%d %H:%M:%S  "), end="")
     for a in args:
         print(a, end="")
     print("")
+
 
 def abort(*args):
     print(time.strftime("%Y/%m/%d %H:%M:%S  "), end="")
@@ -48,9 +57,10 @@ def abort(*args):
     print("")
     sys.exit(1)
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Main()
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+
 
 if __name__ == "__main__":
     # Parse the command line arguments.
@@ -63,9 +73,9 @@ if __name__ == "__main__":
 
     # Parse the config file.
     with open(args.config, 'r') as f:
-      config = yaml.load(f)
-      projects = config["projects"]
-      docs_config = config["docs-cd"]
+        config = yaml.load(f)
+        projects = config["projects"]
+        docs_config = config["docs-cd"]
 
     # Try to create home directory if one does not exist yet.
     if not os.path.isdir(docs_config["home"]):
@@ -78,6 +88,8 @@ if __name__ == "__main__":
         # Load project config.
         domain = projects[project]["domain"]
         repository = projects[project]["git"]
+        if '-b' in repository:
+            switch, branch, repository = shlex.split(repository)
         project_path = docs_config["home"] + "/" + domain
         docs_path = project_path + "/docs"
         venv_path = project_path + "/venv"
@@ -100,7 +112,7 @@ if __name__ == "__main__":
         if not os.path.isdir(docs_path):
             try:
                 log("Cloning git repository " + repository)
-                subprocess.check_output(["git", "clone", repository,  docs_path])
+                subprocess.check_output(["git", "clone", switch, branch, repository, docs_path])
                 os.chdir(docs_path)
             except Exception as error:
                 log("Error cloning " + repository + " on " + docs_path)
@@ -149,7 +161,9 @@ if __name__ == "__main__":
             # script.
             try:
                 log("Compiling the documentation")
-                subprocess.check_output(["bash", "-c", "source " + venv_path + "/bin/activate && pip install -r " + docs_path + "/requirements.txt && make html"])
+                subprocess.check_output(["bash", "-c", "source " + venv_path +
+                                         "/bin/activate && pip install -r "
+                                         + docs_path + "/requirements.txt && make html"])
             except Exception as error:
                 log("Error compiling documentation for " + project)
                 abort(error)
@@ -172,7 +186,8 @@ if __name__ == "__main__":
         # that should not be retained any longer.
         if len(doc_versions) > docs_config["versions"]:
             versions_to_delete = len(doc_versions) - docs_config["versions"]
-            log("Cleaning up " + str(versions_to_delete) + " old versions of the documentation from project " + project)
+            log("Cleaning up " + str(versions_to_delete) +
+                " old versions of the documentation from project " + project)
             # Add path to each directory
             doc_versions = [os.path.join(html_path, f) for f in doc_versions]
             # Sort versions by time

@@ -1,0 +1,7 @@
+# Please use one of the inventories in ./inventory to run this playbook.
+# This is a placeholder to prevent accidental use.
+#
+# eg. ansible-playbook ./playbooks/gitlab.yml --inventory-file ./inventory/production/wgtn --tags "deploy,update" # --extra-vars "csome_variable=no"
+
+[local]
+localhost

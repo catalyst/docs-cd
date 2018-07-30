@@ -16,9 +16,6 @@ docs-cd:
   versions: 30
 
 projects:
-  Catalyst Cloud Docs (previous domain):
-    domain: staging.docs.catalystcloud.io
-    git: -b staging https://github.com/catalyst-cloud/catalystcloud-docs
   Catalyst Cloud Docs :
     domain: staging.docs.catalystcloud.nz
     git: -b staging https://github.com/catalyst-cloud/catalystcloud-docs

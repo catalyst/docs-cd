@@ -1,4 +1,3 @@
-#!/usr/bin/env ansible-playbook
 ---
 
 # This playbook illustrates how to deploy and configure a docs-cd to a compute
@@ -12,17 +11,14 @@
 
   tasks:
     - name: Load variables from cloud-config.yaml
-      include_vars: "cloud-config.yaml"
+      include_vars:
+        dir: vars
+        extensions: [yaml]
 
     # Connect to the Catalyst Cloud. No auth parameters are needed, because an
     # openstack.rc file is expected to be sourced.
     - name: Connect to the Catalyst Cloud
       os_auth:
-    #    auth:
-    #      auth_url: "{{ os_auth_url }}"
-    #      username: "{{ os_username }}"
-    #      password: "{{ os_password }}"
-    #      project_name: "{{ os_project_name }}"
 
     - name: Create keypair
       os_keypair:
@@ -97,12 +93,12 @@
   hosts: docs_nodes
   become: yes
   gather_facts: no
-  vars:
-    testvar: "<## TEST STRING ##>"
 
   tasks:
     - name: Load variables from cloud-config.yaml
-      include_vars: "cloud-config.yaml"
+      include_vars:
+        dir: vars
+        extensions: [yaml]
 
     - name: "Wait for SSH banners"
       local_action: wait_for port=22 host={{ inventory_hostname }} search_regex=OpenSSH delay=5
@@ -166,10 +162,6 @@
         name: rewrite
       register: rewrite_enabled
 
-    - name: debug register 'rewrite_enabled' to check
-      debug:
-        var: rewrite_enabled
-
     - name: remove default apache site configs
       file:
         path: "/etc/apache2/{{ item[0] }}/{{ item[1] }}"
@@ -199,7 +191,7 @@
 
     - name: Copy config.yaml to docs_dir
       copy:
-        src: files/config.yaml
+        src: ../files/config.yaml
         dest: "{{ docs_dir }}/config.yaml"
 
     - name: Enable unattended security updates
@@ -236,6 +228,13 @@
         line: "{{ crontab_entry_root_user }}"
         state: present
         insertafter: 'EOF'
+
+    - name: add cloud_admins to ubuntu authorized_keys
+      authorized_key:
+        user: ubuntu
+        state: present
+        key: "{{item.pubkey}}"
+      with_items: "{{ cloud_admins }}"
 
       # no reload via handler as whole server gets reboot first time around
     - name: Reboot system

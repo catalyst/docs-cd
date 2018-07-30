@@ -1,32 +1,7 @@
 ---
-# OpenStack authentication variables (not required if RC sourced)
-#os_auth_url: https://api.cloud.catalyst.net.nz:5000/v2.0
-#os_region: nz-por-1
-#os_az: nz-por-1a
-#os_project_name: projectname
-#os_username: username
-#os_password: password
 
 # ============================================================================
-# Attributes used for launching the compute instance (required)
-# ============================================================================
-
-image: ubuntu-18.04-x86_64
-private_network_name: "10.15.0.0/24 - Frontend"
-prefix: cat-staging- # optional, intended for when more than one instance is deployed
-instance_name: "{{ prefix }}docs-cd"
-flavor: c1.c1r1
-security_group_name: docs-cd
-# user_data: cloud-init.yaml
-expose_ssh_to: 0.0.0.0/0
-
-keypair_name: glyndavies
-ssh_public_key_file: "{{ lookup('env', 'HOME') }}/.ssh/id_rsa.pub"
-ssh_public_key: "{{ lookup('file', ssh_public_key_file) }}"
-
-
-# ============================================================================
-# Attributes for configuring docs-cd
+# Attributes for configuring docs-cd instance
 # ============================================================================
 
 # if set to true this will add the instance name and IP addess to the user's

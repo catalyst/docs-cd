@@ -1,0 +1,14 @@
+[local]
+127.0.0.1  ansible_connection=local ansible_python_interpreter="/usr/bin/env python"
+
+[docs_nodes]
+
+[docs_nodes:vars]
+ansible_ssh_common_args="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+
+[staging]
+staging.docs.catalystcloud.nz
+
+[staging:vars]
+ansible_user=ubuntu
+ansible_ssh_common_args="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"

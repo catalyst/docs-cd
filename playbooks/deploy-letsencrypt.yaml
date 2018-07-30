@@ -1,0 +1,39 @@
+---
+
+# ============================================================================
+# Play-2  : Configure the docs-cd instance
+# ============================================================================
+- name: Configure the docs-cd instance
+  hosts: staging
+  become: yes
+  gather_facts: no
+  vars:
+    email: glyndavies@catalyst.net.nz
+
+  tasks:
+
+    - name: load the docs-cd config file to read in the domain names
+      include_vars:
+        file: "files/config.yaml"
+        name: domainconfig
+
+    - name: docs_cd
+      apt:
+        name: "{{ item }}"
+      with_items:
+          - software-properties-common
+
+    - name: add Let's Encrypt repo
+      apt_repository:
+        repo: ppa:certbot/certbot
+
+    - name: Install required system packages
+      apt:
+        name: "{{ item }}"
+        update_cache: yes
+      with_items:
+          - python-certbot-apache
+
+    - name: create certs and auto install
+      command: certbot run --apache --agree-tos --email {{ email }} -n -d {{ item.value.domain }}
+      with_dict: "{{ domainconfig.projects }}"

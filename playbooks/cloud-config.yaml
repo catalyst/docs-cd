@@ -7,12 +7,46 @@
 #os_username: username
 #os_password: password
 
+# ============================================================================
 # Attributes used for launching the compute instance (required)
-image: ubuntu-16.04-x86_64
-private_network_name: private-net
-keypair_name: keypair
-instance_name: docs-cd
+# ============================================================================
+
+image: ubuntu-18.04-x86_64
+private_network_name: "10.15.0.0/24 - Frontend"
+prefix: cat-staging- # optional, intended for when more than one instance is deployed
+instance_name: "{{ prefix }}docs-cd"
 flavor: c1.c1r1
 security_group_name: docs-cd
-user_data: cloud-init.yaml
+# user_data: cloud-init.yaml
 expose_ssh_to: 0.0.0.0/0
+
+keypair_name: glyndavies
+ssh_public_key_file: "{{ lookup('env', 'HOME') }}/.ssh/id_rsa.pub"
+ssh_public_key: "{{ lookup('file', ssh_public_key_file) }}"
+
+
+# ============================================================================
+# Attributes for configuring docs-cd
+# ============================================================================
+
+# if set to true this will add the instance name and IP addess to the user's
+# local machine /etc/hosts file.
+# This option requires -K to be passed to the ansible-playbook command to
+# prompt for sudo password
+set_local_host_entry: false
+
+timezone: UTC
+# the user account that will manage the docs-cd instance
+docs_user: ubuntu
+# the install directory, assumed to be relative to docs_user directory
+docs_install_dir: docs-cd
+# docs-cd full installation path
+docs_dir: "/home/{{ docs_user }}/{{ docs_install_dir }}"
+
+crontab_users:
+  - ubuntu
+  - root
+crontab_entry_docs_user:
+  - "0 * * * * {{ docs_dir }}/docs-cd.py -c {{ docs_dir }}/config.yaml -l {{ docs_dir }}/docs-cd.log"
+crontab_entry_root_user:
+  - "* * * * * {{ docs_dir }}/docs-publish.py -c {{ docs_dir }}/config.yaml -t {{ docs_dir }}/templates/vhost_template.cfg -l {{ docs_dir }}/docs-publish.log"

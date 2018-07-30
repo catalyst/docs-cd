@@ -4,17 +4,15 @@
 # This playbook illustrates how to deploy and configure a docs-cd to a compute
 # instance on an OpenStack based cloud.
 
+# ============================================================================
+# Play-1 : Deploy Cloud infrastructure
+# ============================================================================
 - name: Deploy the docs-cd compute instance on the Catalyst Cloud
-  hosts: localhost
+  hosts: local
 
   tasks:
     - name: Load variables from cloud-config.yaml
       include_vars: "cloud-config.yaml"
-
-    #- name: Fetch information about the Catalyst Cloud
-    #  os_client_config:
-    #    clouds:
-    #      - catalyst_cloud
 
     # Connect to the Catalyst Cloud. No auth parameters are needed, because an
     # openstack.rc file is expected to be sourced.
@@ -25,6 +23,11 @@
     #      username: "{{ os_username }}"
     #      password: "{{ os_password }}"
     #      project_name: "{{ os_project_name }}"
+
+    - name: Create keypair
+      os_keypair:
+        name: "{{ keypair_name }}"
+        public_key: "{{ ssh_public_key }}"
 
     - name: Create a security group for docs-cd
       os_security_group:
@@ -40,7 +43,6 @@
         port_range_min: 22
         port_range_max: 22
         remote_ip_prefix: "{{ expose_ssh_to }}"
-
 
     - name: Create a security rule for HTTP access
       os_security_group_rule:
@@ -67,30 +69,182 @@
         image: "{{ image }}"
         key_name: "{{ keypair_name }}"
         flavor: "{{ flavor }}"
-        userdata: "{{ lookup('file', user_data) }}"
         nics:
           - net-name: "{{ private_network_name }}"
         security_groups: "default,{{ security_group_name }}"
-        auto_ip: true
       register: instance
 
-    # Add the compute instance as a new host to Ansible's in memory inventory,
-    # so that it can be utilised by another play on the same playbook.
+    - name: Assign a floating IP
+      os_floating_ip:
+        server: "{{ instance_name }}"
+        state: present
+      register: floating_ip_info
+
+    - name: ensure IP not in known_hosts
+      shell: ssh-keygen -f "/home/glyndavies/.ssh/known_hosts" -R "{{ floating_ip_info.floating_ip.floating_ip_address }}"
+      ignore_errors: yes
+
+    # Add the instance as a host entry to Ansible's in memory inventory,
     - add_host: name={{ instance.server.public_v4 }}
-                groups=created_nodes
+                groups=docs_nodes
                 ansible_user=ubuntu
                 instance_name={{ instance.server.name }}
 
-# Copy the config.yaml file to the compute instance
-- name: Configure the compute instance
-  hosts: created_nodes
+# ============================================================================
+# Play-2  : Configure the docs-cd instance
+# ============================================================================
+- name: Configure the docs-cd instance
+  hosts: docs_nodes
   become: yes
-  become_method: sudo
-  become_user: root
+  gather_facts: no
+  vars:
+    testvar: "<## TEST STRING ##>"
+
   tasks:
-    - name: Wait for SSH to come up
-      wait_for_connection:
-    - name: Copy config.yaml to /home/ubuntu/docs-cd/config.yaml
+    - name: Load variables from cloud-config.yaml
+      include_vars: "cloud-config.yaml"
+
+    - name: "Wait for SSH banners"
+      local_action: wait_for port=22 host={{ inventory_hostname }} search_regex=OpenSSH delay=5
+      become: False
+
+    - name: "Add cloud instance name to users local /etc/hosts"
+      delegate_to: localhost
+      become: yes
+      blockinfile:
+        dest: /etc/hosts
+        insertafter: EOF
+        block: |
+          {{ inventory_hostname }} {{ instance_name }}
+        marker: "# {mark} ANSIBLE MANAGED BLOCK for {{ inventory_hostname }}"
+      when: set_local_host_entry
+
+    - name: Update apt cache
+      raw: apt update -y
+
+    - name: Install python
+      raw: >
+        which python || apt-get install -y python3 && echo 'installed'
+      register: python
+      changed_when: python.stdout == 'installed'
+
+    - name: make the installed python the default (Ubuntu)
+      raw: >
+        sudo update-alternatives --install /usr/bin/python python /usr/bin/python3 10
+      register: python-set
+
+    - name: Upgrade all packages to the latest version
+      apt:
+        name: "*"
+        state: latest
+        update_cache: yes
+        force_apt_get: yes
+
+    - name: set timezone to UTC
+      timezone:
+        name: UTC
+
+    - name: Add NZ locale to all instances
+      locale_gen:
+        name: en_NZ.UTF-8
+        state: present
+
+    - name: Install required system packages
+      apt:
+        name: "{{ item }}"
+      with_items:
+        - apache2
+        - git
+        - python-dev
+        - python-pip
+        - python-virtualenv
+        - unattended-upgrades
+
+    - name: enable apache rewrite mod
+      apache2_module:
+        state: present
+        name: rewrite
+      register: rewrite_enabled
+
+    - name: debug register 'rewrite_enabled' to check
+      debug:
+        var: rewrite_enabled
+
+    - name: remove default apache site configs
+      file:
+        path: "/etc/apache2/{{ item[0] }}/{{ item[1] }}"
+        state: absent
+      with_nested:
+        - [ 'sites-enabled', 'sites-available' ]
+        - [ '000-default.conf', 'default-ssl.conf' ]
+
+    - name: remove /var/www/html
+      file:
+        path: /var/www/html
+        state: absent
+
+    - name: clone the docs-cd repo from GitHub
+      git:
+        repo: https://github.com/catalyst/docs-cd.git
+        dest: "{{ docs_dir }}"
+        force: yes
+
+    - name: set docs-cd directory owner and permissions
+      file:
+        path: "{{ docs_dir }}"
+        state: directory
+        recurse: true
+        owner: "{{ docs_user }}"
+        group: "{{ docs_user }}"
+
+    - name: Copy config.yaml to docs_dir
       copy:
-        src: ../config.yaml
-        dest: /home/ubuntu/docs-cd/config.yaml
+        src: files/config.yaml
+        dest: "{{ docs_dir }}/config.yaml"
+
+    - name: Enable unattended security updates
+      debconf:
+        name: unattended-upgrades
+        question: unattended-upgrades/enable_auto_updates
+        value: true
+        vtype: boolean
+
+    - name: Reconfigure unattended upgrades with dpkg
+      command: '/usr/sbin/dpkg-reconfigure --frontend noninteractive unattended-upgrades'
+
+    - name: create crontab files
+      file:
+        path: "/var/spool/cron/crontabs/{{ item }}"
+        state: touch
+        owner: "{{ item }}"
+        group: crontab
+        mode: 0600
+      with_items: "{{ crontab_users}}"
+
+    - name: enable cron job tochecks for doc updates and compile every hour
+      become: true
+      lineinfile:
+        path: /var/spool/cron/crontabs/ubuntu
+        line: "{{ crontab_entry_docs_user }}"
+        state: present
+        insertafter: 'EOF'
+
+    - name: enable cron job to updates apache config every minute, if changed
+      become: true
+      lineinfile:
+        path: /var/spool/cron/crontabs/root
+        line: "{{ crontab_entry_root_user }}"
+        state: present
+        insertafter: 'EOF'
+
+      # no reload via handler as whole server gets reboot first time around
+    - name: Reboot system
+      shell: sleep 2 && shutdown -r now "Ansible triggered reboot"
+      async: 1
+      poll: 0
+      ignore_errors: true
+      when: rewrite_enabled.changed == true
+
+    - name: "Wait for SSH banners"
+      local_action: wait_for port=22 host={{ inventory_hostname }} search_regex=OpenSSH delay=5
+      become: False

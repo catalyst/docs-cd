@@ -1,7 +1,7 @@
 ---
 
 # ============================================================================
-# Play-2  : Configure the docs-cd instance
+# Play-1  : Configure Let's Encrypt certs on domains
 # ============================================================================
 - name: Configure the docs-cd instance
   hosts: staging
@@ -14,7 +14,7 @@
 
     - name: load the docs-cd config file to read in the domain names
       include_vars:
-        file: "files/config.yaml"
+        file: "../files/config.yaml"
         name: domainconfig
 
     - name: docs_cd

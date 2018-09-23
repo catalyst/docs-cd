@@ -22,23 +22,33 @@ import yaml
 import time
 import subprocess
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Functions
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+
 
 def get_args():
-    parser = argparse.ArgumentParser(description='Continuous deployment documentation system based on Sphinx')
+    parser = argparse.ArgumentParser(
+        description='Continuous deployment documentation system based on Sphinx')
     parser.add_argument('-c', '--config', type=str, help='Configuration file', required=True)
-    parser.add_argument('-l', '--log', type=str, help='Write output to a log file', action='store', dest='log_file')
-    parser.add_argument('-t', '--vhost-template', type=str, help='Apache vHost template file', required=True)
+    parser.add_argument('-l', '--log', type=str, help='Write output to a log file',
+                        action='store', dest='log_file')
+    parser.add_argument('-t', '--vhost-default-template', type=str,
+                        help='Apache vHost base template file', required=True)
+    parser.add_argument('-r', '--vhost-redirect-template', type=str,
+                        help='Apache vHost http redirect template file', required=True)
+    parser.add_argument('-s', '--vhost-ssl-template', type=str,
+                        help='Apache vHost SSL template file', required=True)
     args = parser.parse_args()
     return args
+
 
 def log(*args):
     print(time.strftime("%Y/%m/%d %H:%M:%S  "), end="")
     for a in args:
         print(a, end="")
     print("")
+
 
 def abort(*args):
     print(time.strftime("%Y/%m/%d %H:%M:%S  "), end="")
@@ -47,9 +57,10 @@ def abort(*args):
     print("")
     sys.exit(1)
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Main()
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+
 
 if __name__ == "__main__":
     # Parse the command line arguments.
@@ -62,55 +73,73 @@ if __name__ == "__main__":
 
     # Parse the config file.
     with open(args.config, 'r') as f:
-      config = yaml.load(f)
-      projects = config["projects"]
-      docs_config = config["docs-cd"]
+        config = yaml.load(f)
+        projects = config["projects"]
+        docs_config = config["docs-cd"]
 
     changes = False
     for project in projects:
         # Load project config.
         domain = projects[project]["domain"]
         repository = projects[project]["git"]
+        visibility = projects[project]["visibility"]
         project_path = docs_config["home"] + "/" + domain
         docs_path = project_path + "/docs"
         venv_path = project_path + "/venv"
         html_path = project_path + "/html"
         www_path = docs_config["www-home"] + "/" + domain
-        vhost_path = "/etc/apache2/sites-available/" + domain + ".conf"
-        vhost_symlink = "/etc/apache2/sites-enabled/" + domain + ".conf"
+        # vhost_path = "/etc/apache2/sites-available/" + domain + ".conf"
+        vhost_base_path = "/etc/apache2/sites-available/"
+        # vhost_symlink = "/etc/apache2/sites-enabled/" + domain + ".conf"
+        vhost_base_symlink = "/etc/apache2/sites-enabled/"
         log("Working on project ", project, ".")
 
-        # Create an apache vhost config for this project, if one does not exist
-        # yet.
-        if not os.path.isfile(vhost_path):
-            log("Creating a vhost config for the project")
-            # Read vhost template from file.
-            with open(args.vhost_template, 'r') as f:
-              vhost_template = f.read()
-              vhost = vhost_template.replace('${SERVER_NAME}', domain)
-              # If IP access restriction has been defined on the config file,
-              # add the "Require ip" rule to the vhost.
-              try:
-                  projects[project]["restrict-ip"]
-              except KeyError:
-                  pass
-              else:
-                  vhost = vhost.replace('# Require ip', "Require ip " + projects[project]["restrict-ip"])
+        # Create an apache vhost config for this project, if one does not exist yet.
+        ssltag = ''
+        if visibility is 'external':
+            vhost__templates = [args.vhost_redirect_template, args.vhost_ssl_template]
+        else:
+            vhost__templates = [args.vhost_default_template]
 
-            # Write new vhost to file.
-            with open(vhost_path, 'w') as f:
-                f.write(vhost)
-            changes = True
+        for template in vhost__templates:
+            if 'ssl' in template:
+                ssltag = '-ssl'
+                # Write new vhost to file.
+                vhost_path = vhost_base_path + domain + ssltag + ".conf"
+                vhost_symlink = vhost_base_symlink + domain + ssltag + ".conf"
+            else:
+                vhost_path = vhost_base_path + domain + ssltag + ".conf"
+                vhost_symlink = vhost_base_symlink + domain + ssltag + ".conf"
+            if not os.path.isfile(vhost_path):
+                log("Creating a vhost config for the project")
+                # Read vhost template from file.
+                with open(template, 'r') as f:
+                    vhost_template = f.read()
+                    vhost = vhost_template.replace('${SERVER_NAME}', domain)
+                    # If IP access restriction has been defined on the config file,
+                    # add the "Require ip" rule to the vhost.
+                    try:
+                        projects[project]["restrict-ip"]
+                    except KeyError:
+                        pass
+                    else:
+                        vhost = vhost.replace('# Require ip', "Require ip " +
+                                              projects[project]["restrict-ip"])
 
-        # Enable the apache vhost, if not enabled yet.
-        if not os.path.islink(vhost_symlink):
-            log("Enabling the vhost for the project")
-            try:
-                os.symlink(vhost_path, vhost_symlink)
+                with open(vhost_path, 'w') as f:
+                    f.write(vhost)
                 changes = True
-            except Exception as error:
-                log("Error creating symlink from " + vhost_path + " to " + vhost_symlink)
-                abort(error)
+
+            # Enable the apache vhost, if not enabled yet.
+            if not os.path.islink(vhost_symlink):
+                log("Enabling the vhost for the project")
+                try:
+                    os.symlink(vhost_path, vhost_symlink)
+                    changes = True
+                except Exception as error:
+                    log("Error creating symlink from " + vhost_path + " to " + vhost_symlink)
+                    abort(error)
+
         # Find out the latest successful build of the docs for this project.
         # TODO: make this a function that is re-used on docs-cd.py.
         doc_versions = os.listdir(html_path)
@@ -148,6 +177,6 @@ if __name__ == "__main__":
                 log("Symlink is up to date (points to the latest build)")
 
     # Reload apache config if changes were made.
-    if changes == True:
+    if changes is True:
         log("Reloading apache config to make the changes effective")
         subprocess.check_output(["service", "apache2", "reload"])

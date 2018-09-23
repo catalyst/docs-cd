@@ -1,4 +1,4 @@
-ansible-venv/
-*.retry
-.vault
-ansible.cfg
+local-configs/
+ansible/*.retry
+ansible/.vault
+ansible/ansible.cfg

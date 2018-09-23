@@ -12,3 +12,10 @@ staging.docs.catalystcloud.nz
 [staging:vars]
 ansible_user=ubuntu
 ansible_ssh_common_args="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+
+[production]
+docs.catalystcloud.nz
+
+[production:vars]
+ansible_user=ubuntu
+ansible_ssh_common_args="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"

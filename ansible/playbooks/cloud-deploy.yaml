@@ -61,6 +61,7 @@
     - name: Create the docs-cd compute instance
       os_server:
         state: present
+        auto_ip: false
         name: "{{ instance_name }}"
         image: "{{ image }}"
         key_name: "{{ keypair_name }}"
@@ -74,6 +75,7 @@
       os_floating_ip:
         server: "{{ instance_name }}"
         state: present
+        wait: yes
       register: floating_ip_info
 
     - name: ensure IP not in known_hosts
@@ -92,7 +94,7 @@
 - name: Configure the docs-cd instance
   hosts: docs_nodes
   become: yes
-  gather_facts: no
+  gather_facts: yes
 
   tasks:
     - name: Load variables from cloud-config.yaml

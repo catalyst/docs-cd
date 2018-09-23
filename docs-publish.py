@@ -33,8 +33,10 @@ def get_args():
     parser.add_argument('-c', '--config', type=str, help='Configuration file', required=True)
     parser.add_argument('-l', '--log', type=str, help='Write output to a log file',
                         action='store', dest='log_file')
-    parser.add_argument('-t', '--vhost-template', type=str,
-                        help='Apache vHost template file', required=True)
+    parser.add_argument('-t', '--vhost-default-template', type=str,
+                        help='Apache vHost base template file', required=True)
+    parser.add_argument('-r', '--vhost-redirect-template', type=str,
+                        help='Apache vHost http redirect template file', required=True)
     parser.add_argument('-s', '--vhost-ssl-template', type=str,
                         help='Apache vHost SSL template file', required=True)
     args = parser.parse_args()
@@ -80,6 +82,7 @@ if __name__ == "__main__":
         # Load project config.
         domain = projects[project]["domain"]
         repository = projects[project]["git"]
+        visibility = projects[project]["visibility"]
         project_path = docs_config["home"] + "/" + domain
         docs_path = project_path + "/docs"
         venv_path = project_path + "/venv"
@@ -93,7 +96,10 @@ if __name__ == "__main__":
 
         # Create an apache vhost config for this project, if one does not exist yet.
         ssltag = ''
-        vhost__templates = [args.vhost_template, args.vhost_ssl_template]
+        if visibility is 'external':
+            vhost__templates = [args.vhost_redirect_template, args.vhost_ssl_template]
+        else:
+            vhost__templates = [args.vhost_default_template]
 
         for template in vhost__templates:
             if 'ssl' in template:
@@ -104,7 +110,6 @@ if __name__ == "__main__":
             else:
                 vhost_path = vhost_base_path + domain + ssltag + ".conf"
                 vhost_symlink = vhost_base_symlink + domain + ssltag + ".conf"
-
             if not os.path.isfile(vhost_path):
                 log("Creating a vhost config for the project")
                 # Read vhost template from file.

@@ -13,10 +13,10 @@
 #os_password: password
 
 image: ubuntu-18.04-x86_64
-# private_network_name: "10.15.0.0/24 - Frontend"
-private_network_name: "private-net"
-prefix: cat-staging- # optional, intended for when more than one instance is deployed
-instance_name: "{{ prefix }}docs-cd"
+private_network_name: "10.15.0.0/24 - Frontend"
+# private_network_name: "private-net"
+prefix: cat-prod- # optional, intended for when more than one instance is deployed
+instance_name: "{{ prefix }}docs-cd-1"
 flavor: c1.c1r1
 security_group_name: docs-cd
 # user_data: cloud-init.yaml

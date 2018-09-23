@@ -2,6 +2,14 @@
 # Docs-CD config file
 #
 
+# ****************************************************************************
+# NOTE:
+# This is a placeholder file
+# Please replace this with the actual config file for the sites needing to be
+# deployed
+# ****************************************************************************
+
+
 docs-cd:
   # The home parameter defines where docs-cd will store all documentation
   # artifacts it produces.
@@ -16,10 +24,12 @@ docs-cd:
   versions: 30
 
 projects:
-  Catalyst Cloud Docs:
-    domain: staging.docs.catalystcloud.nz
-    git: -b staging https://github.com/catalyst-cloud/catalystcloud-docs
-  Catalyst Cloud Project Plan:
-    domain: staging.project-plan.int.catalystcloud.nz
-    git: -b staging https://gitlab.int.catalystcloud.nz/catalystcloud/project-plan
-    restrict-ip: 202.78.240.7/32 202.6.117.189/32 114.110.38.54/32 203.109.145.15/32
+  # Sample documentation project exposed to the public Internet.
+  Catalyst Cloud:
+    domain: docs.catalystcloud.io
+    git: https://github.com/catalyst/catalystcloud-docs
+  # Sample documentation project with IP access restrictions.
+  Catalyst Cloud Private:
+    domain: private-docs.catalystcloud.io
+    git: https://github.com/catalyst/catalystcloud-docs
+    restrict-ip: 100.100.100.100/32

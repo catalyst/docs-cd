@@ -85,6 +85,7 @@ if __name__ == "__main__":
             log("Could not create project directory at ", docs_config["home"])
 
     for project in projects:
+        switch = None
         # Load project config.
         domain = projects[project]["domain"]
         repository = projects[project]["git"]
@@ -112,7 +113,10 @@ if __name__ == "__main__":
         if not os.path.isdir(docs_path):
             try:
                 log("Cloning git repository " + repository)
-                subprocess.check_output(["git", "clone", switch, branch, repository, docs_path])
+                if switch:
+                    subprocess.check_output(["git", "clone", switch, branch, repository, docs_path])
+                else:
+                    subprocess.check_output(["git", "clone", repository, docs_path])
                 os.chdir(docs_path)
             except Exception as error:
                 log("Error cloning " + repository + " on " + docs_path)

@@ -24,4 +24,4 @@ crontab_users:
 crontab_entry_docs_user:
   - "0 * * * * {{ docs_dir }}/docs-cd.py -c {{ docs_dir }}/config.yaml -l {{ docs_dir }}/docs-cd.log"
 crontab_entry_root_user:
-  - "* * * * * {{ docs_dir }}/docs-publish.py -c {{ docs_dir }}/config.yaml -t {{ docs_dir }}/templates/vhost_template.cfg -l {{ docs_dir }}/docs-publish.log"
+  - "* * * * * {{ docs_dir }}/docs-publish.py -c {{ docs_dir }}/config.yaml -t {{ docs_dir }}/templates/vhost_default_template.cfg -s {{ docs_dir }}/templates/vhost_ssl_template.cfg -l {{ docs_dir }}/docs-publish.log"

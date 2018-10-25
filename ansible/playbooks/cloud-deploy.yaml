@@ -94,7 +94,7 @@
 - name: Configure the docs-cd instance
   hosts: docs_nodes
   become: yes
-  gather_facts: yes
+  gather_facts: no
 
   tasks:
     - name: Load variables from cloud-config.yaml

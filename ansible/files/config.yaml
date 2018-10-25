@@ -2,14 +2,6 @@
 # Docs-CD config file
 #
 
-# ****************************************************************************
-# NOTE:
-# This is a placeholder file
-# Please replace this with the actual config file for the sites needing to be
-# deployed
-# ****************************************************************************
-
-
 docs-cd:
   # The home parameter defines where docs-cd will store all documentation
   # artifacts it produces.
@@ -24,12 +16,58 @@ docs-cd:
   versions: 30
 
 projects:
-  # Sample documentation project exposed to the public Internet.
-  Catalyst Cloud:
+  Catalyst Cloud Docs (previous domain):
     domain: docs.catalystcloud.io
-    git: https://github.com/catalyst/catalystcloud-docs
-  # Sample documentation project with IP access restrictions.
-  Catalyst Cloud Private:
-    domain: private-docs.catalystcloud.io
-    git: https://github.com/catalyst/catalystcloud-docs
-    restrict-ip: 100.100.100.100/32
+    git: https://github.com/catalyst-cloud/catalystcloud-docs
+    https: enabled
+  Catalyst Cloud Docs:
+    domain: docs.catalystcloud.nz
+    git: https://github.com/catalyst-cloud/catalystcloud-docs
+    https: enabled
+  MyPortfolio:
+    domain: docs.myportfolio.school.nz
+    git: https://github.com/catalyst/myportfolio-school-docs
+    https: enabled
+  HelpNurse:
+    domain: help.nurseportfolio.nz
+    git: https://gitlab.wgtn.cat-it.co.nz/elearning/nurseportfolio-help
+    https: enabled
+  Encounter Solutions:
+    domain: docs.encountersolutions.co.nz
+    git: https://gitlab.wgtn.cat-it.co.nz/tatianag/esl-documentation
+    https: disabled
+  Catalyst Devtools:
+    domain: devtools-docs.wgtn.cat-it.co.nz
+    git: https://gitlab.wgtn.cat-it.co.nz/devtools/docs
+    restrict-ip: 202.78.240.7/32 202.6.117.189/32 114.110.38.54/32
+    https: disabled
+  Odoo Docs:
+    domain: docs.odoo.wgtn.cat-it.co.nz
+    git: https://gitlab.wgtn.cat-it.co.nz/odoo/odoo-documentation
+    https: disabled
+    restrict-ip: 202.78.240.7/32 202.6.117.189/32 114.110.38.54/32
+  Odoo Dev Docs:
+    domain: dev-docs.odoo.wgtn.cat-it.co.nz
+    git: https://gitlab.wgtn.cat-it.co.nz/odoo/odoo-dev-documentation
+    https: disabled
+    restrict-ip: 202.78.240.7/32 202.6.117.189/32 114.110.38.54/32
+  Catalyst Cloud Operations Manual:
+    domain: ops-manual.int.catalystcloud.nz
+    git: https://gitlab.int.catalystcloud.nz/catalystcloud/operations-manual.git
+    https: disabled
+    restrict-ip: 202.78.240.7/32 202.6.117.189/32 114.110.38.54/32
+  Catalyst Cloud Compliance:
+    domain: compliance.int.catalystcloud.nz
+    git: https://gitlab.wgtn.cat-it.co.nz/catalyst-cloud/cc-compliance
+    https: disabled
+    restrict-ip: 202.78.240.7/32 202.6.117.189/32 114.110.38.54/32
+  Catalyst Cloud Business Process Manual:
+    domain: process-manual.int.catalystcloud.nz
+    git: https://gitlab.int.catalystcloud.nz/catalystcloud/process-manual.git
+    https: disabled
+    restrict-ip: 202.78.240.7/32 202.6.117.189/32 114.110.38.54/32
+  Catalyst Cloud Project Plan:
+    domain: project-plan.int.catalystcloud.nz
+    git: https://gitlab.int.catalystcloud.nz/catalystcloud/project-plan
+    https: disabled
+    restrict-ip: 202.78.240.7/32 202.6.117.189/32 114.110.38.54/32 203.109.145.15/32

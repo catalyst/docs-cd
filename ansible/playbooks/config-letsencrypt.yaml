@@ -36,4 +36,5 @@
 
     - name: create certs and auto install
       command: certbot run --apache --agree-tos --email {{ email }} -n -d {{ item.value.domain }}
+      when: item.value.https == 'enabled'
       with_dict: "{{ domainconfig.projects }}"

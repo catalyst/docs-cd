@@ -34,9 +34,7 @@ def get_args():
     parser.add_argument('-l', '--log', type=str, help='Write output to a log file',
                         action='store', dest='log_file')
     parser.add_argument('-t', '--vhost-default-template', type=str,
-                        help='Apache vHost base template file', required=True)
-    parser.add_argument('-r', '--vhost-redirect-template', type=str,
-                        help='Apache vHost http redirect template file', required=True)
+                        help='Apache vHost default template file', required=True)
     parser.add_argument('-s', '--vhost-ssl-template', type=str,
                         help='Apache vHost SSL template file', required=True)
     args = parser.parse_args()
@@ -82,27 +80,22 @@ if __name__ == "__main__":
         # Load project config.
         domain = projects[project]["domain"]
         repository = projects[project]["git"]
-        visibility = projects[project]["visibility"]
+        https_required = projects[project]["https"]
         project_path = docs_config["home"] + "/" + domain
         docs_path = project_path + "/docs"
         venv_path = project_path + "/venv"
         html_path = project_path + "/html"
         www_path = docs_config["www-home"] + "/" + domain
-        # vhost_path = "/etc/apache2/sites-available/" + domain + ".conf"
         vhost_base_path = "/etc/apache2/sites-available/"
-        # vhost_symlink = "/etc/apache2/sites-enabled/" + domain + ".conf"
         vhost_base_symlink = "/etc/apache2/sites-enabled/"
         log("Working on project ", project, ".")
 
         # Create an apache vhost config for this project, if one does not exist yet.
         ssltag = ''
-        if visibility is 'external':
-            vhost__templates = [args.vhost_redirect_template, args.vhost_ssl_template]
-        else:
-            vhost__templates = [args.vhost_default_template]
+        vhost__templates = [args.vhost_default_template, args.vhost_ssl_template]
 
         for template in vhost__templates:
-            if 'ssl' in template:
+            if 'ssl' in template and https_required == 'enabled':
                 ssltag = '-ssl'
                 # Write new vhost to file.
                 vhost_path = vhost_base_path + domain + ssltag + ".conf"
@@ -110,6 +103,7 @@ if __name__ == "__main__":
             else:
                 vhost_path = vhost_base_path + domain + ssltag + ".conf"
                 vhost_symlink = vhost_base_symlink + domain + ssltag + ".conf"
+
             if not os.path.isfile(vhost_path):
                 log("Creating a vhost config for the project")
                 # Read vhost template from file.
@@ -125,6 +119,8 @@ if __name__ == "__main__":
                     else:
                         vhost = vhost.replace('# Require ip', "Require ip " +
                                               projects[project]["restrict-ip"])
+                    if 'default' in template and https_required == 'enabled':
+                        vhost = vhost.replace('# Rewrite', "Rewrite ")
 
                 with open(vhost_path, 'w') as f:
                     f.write(vhost)

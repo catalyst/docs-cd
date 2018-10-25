@@ -24,6 +24,5 @@
 
 # Publish all projects
 sudo /home/ubuntu/docs-cd/docs-publish.py -c /home/ubuntu/docs-cd/config.yaml \
--t /home/ubuntu/docs-cd/templates/vhost_default_template.cfg \
--r /home/ubuntu/docs-cd/templates/vhost_redirect_template.cfg \
--s /home/ubuntu/docs-cd/templates/vhost_ssl_template.cfg
+-t /home/ubuntu/docs-cd/ansible/templates/vhost_default_template.cfg \
+-s /home/ubuntu/docs-cd/ansible/templates/vhost_ssl_template.cfg

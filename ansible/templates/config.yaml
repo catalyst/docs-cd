@@ -20,8 +20,10 @@ projects:
   Catalyst Cloud:
     domain: docs.catalystcloud.io
     git: https://github.com/catalyst/catalystcloud-docs
+    https: enabled
   # Sample documentation project with IP access restrictions.
   Catalyst Cloud Private:
     domain: private-docs.catalystcloud.io
     git: https://github.com/catalyst/catalystcloud-docs
+    https: disabled
     restrict-ip: 100.100.100.100/32

@@ -2,3 +2,4 @@ local-configs/
 ansible/*.retry
 ansible/.vault
 ansible/ansible.cfg
+local_repo_notes.md

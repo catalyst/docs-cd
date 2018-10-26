@@ -120,7 +120,7 @@ if __name__ == "__main__":
                         vhost = vhost.replace('# Require ip', "Require ip " +
                                               projects[project]["restrict-ip"])
                     if 'default' in template and https_required == 'enabled':
-                        vhost = vhost.replace('# Rewrite', "Rewrite ")
+                        vhost = vhost.replace('# Rewrite', "Rewrite")
 
                 with open(vhost_path, 'w') as f:
                     f.write(vhost)

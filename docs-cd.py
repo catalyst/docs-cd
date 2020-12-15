@@ -154,7 +154,7 @@ if __name__ == "__main__":
             if not os.path.isdir(venv_path):
                 try:
                     log("Creating a venv ")
-                    subprocess.check_output(["virtualenv", venv_path])
+                    subprocess.check_output(["virtualenv", "-p", "/usr/bin/python3", venv_path])
                 except Exception as error:
                     log("Could not create virtual environment for " + project)
                     abort(error)

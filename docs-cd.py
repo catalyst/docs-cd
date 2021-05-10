@@ -163,11 +163,17 @@ if __name__ == "__main__":
             # all sub-commands need to run under the same shell and inherit the
             # changes to the environment variables made by virtualenv's activate
             # script.
+            #try:
+            #    log("Compiling the documentation")
+            #    subprocess.check_output(["bash", "-c", "source " + venv_path +
+            #                             "/bin/activate && pip install -r "
+            #                             + docs_path + "/requirements.txt && make html"])
             try:
                 log("Compiling the documentation")
                 subprocess.check_output(["bash", "-c", "source " + venv_path +
                                          "/bin/activate && pip install -r "
-                                         + docs_path + "/requirements.txt && make html"])
+                                         + docs_path + "/requirements.txt && cd " + docs_path +
+                                         " && make html"])
             except Exception as error:
                 log("Error compiling documentation for " + project)
                 abort(error)
